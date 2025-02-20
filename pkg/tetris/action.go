@@ -76,6 +76,21 @@ func (a action) String() string {
 	return actionToStrMap[a]
 }
 
+func (a action) GetLinesCleared() int {
+	switch a {
+	case actionSingle:
+		return 1
+	case actionDouble:
+		return 2
+	case actionTriple:
+		return 3
+	case actionTetris:
+		return 4
+	default:
+		return 0
+	}
+}
+
 // ParseAction attempts to parse the given value into Action.
 // It supports string, fmt.Stringer, int, int64, and int32.
 // If the value is not a valid Action or the value is not a supported type, it will

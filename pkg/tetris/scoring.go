@@ -2,6 +2,7 @@ package tetris
 
 import (
 	"fmt"
+	"os"
 )
 
 // Scoring is a scoring system for Tetris.
@@ -20,7 +21,8 @@ type Scoring struct {
 	total      int
 	backToBack bool
 
-	lastCleared int // Stores the number of lines cleared in the last action
+	lastCleared int    // Stores the number of lines cleared in the last action
+	playerName  string // ✅ New: Store player's name
 }
 
 // LastClearedLines returns the number of lines cleared in the most recent action.
@@ -90,6 +92,9 @@ func (s *Scoring) AddHardDrop(lines int) {
 // ProcessAction processes an action and updates the score, lines cleared, level, etc.
 // The returned boolean indicates if the game should end.
 // ProcessAction processes an action and updates the score, lines cleared, level, etc.
+// Define the file path where we store cleared lines
+const clearedLinesFile = "cleared_lines.log"
+
 func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	if a == Actions.None {
 		return false, nil
@@ -113,36 +118,52 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	}
 
 	s.total += int(points+backToBack) * s.level
-	linesCleared := int((points + backToBack) / 100)
 
-	s.lastCleared = linesCleared // Store last cleared lines
+	// Get cleared lines
+	linesCleared := a.GetLinesCleared()
+
+	// ✅ Write to file if cleared lines change and it's not 0
+	if linesCleared > 0 && linesCleared != s.lastCleared {
+		err := appendToFile(clearedLinesFile, fmt.Sprintf("Lines Cleared: %d\n", linesCleared))
+		if err != nil {
+			fmt.Println("⚠️ Error writing to file:", err)
+		}
+	}
+
+	// Update last cleared lines
+	s.lastCleared = linesCleared
 	s.lines += linesCleared
 
-	// if max lines enabled, and max lines reached
+	// Check for max lines
 	if s.maxLines > 0 && s.lines >= s.maxLines {
 		s.lines = s.maxLines
-
 		if s.endOnMaxLines {
 			return true, nil
 		}
 	}
 
-	// while increase level enabled, and the next level was reached
+	// Level up logic
 	for s.increaseLevel && s.lines >= s.level*5 {
 		s.level++
-
-		// if no max level, or max level not reached
-		if s.maxLevel <= 0 || s.level < s.maxLevel {
-			continue
+		if s.maxLevel > 0 && s.level >= s.maxLevel {
+			s.level = s.maxLevel
+			if s.endOnMaxLevel {
+				return true, nil
+			}
+			break
 		}
-
-		// if max level reached
-		s.level = s.maxLevel
-		if s.endOnMaxLevel {
-			return true, nil
-		}
-		break
 	}
 
 	return false, nil
+}
+
+func appendToFile(filename, content string) error {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(content)
+	return err
 }
