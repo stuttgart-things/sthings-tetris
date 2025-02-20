@@ -19,6 +19,13 @@ type Scoring struct {
 
 	total      int
 	backToBack bool
+
+	lastCleared int // Stores the number of lines cleared in the last action
+}
+
+// LastClearedLines returns the number of lines cleared in the most recent action.
+func (s *Scoring) LastClearedLines() int {
+	return s.lastCleared
 }
 
 // NewScoring creates a new scoring system.
@@ -82,6 +89,7 @@ func (s *Scoring) AddHardDrop(lines int) {
 
 // ProcessAction processes an action and updates the score, lines cleared, level, etc.
 // The returned boolean indicates if the game should end.
+// ProcessAction processes an action and updates the score, lines cleared, level, etc.
 func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	if a == Actions.None {
 		return false, nil
@@ -105,7 +113,10 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	}
 
 	s.total += int(points+backToBack) * s.level
-	s.lines += int((points + backToBack) / 100)
+	linesCleared := int((points + backToBack) / 100)
+
+	s.lastCleared = linesCleared // Store last cleared lines
+	s.lines += linesCleared
 
 	// if max lines enabled, and max lines reached
 	if s.maxLines > 0 && s.lines >= s.maxLines {

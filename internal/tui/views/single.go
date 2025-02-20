@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/stuttgart-things/sthings-tetris/internal/tui/components"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -20,7 +18,6 @@ import (
 
 	"github.com/stuttgart-things/sthings-tetris/internal/config"
 	"github.com/stuttgart-things/sthings-tetris/internal/data"
-	"github.com/stuttgart-things/sthings-tetris/internal/k8s"
 	"github.com/stuttgart-things/sthings-tetris/internal/tui"
 	"github.com/stuttgart-things/sthings-tetris/pkg/tetris"
 	"github.com/stuttgart-things/sthings-tetris/pkg/tetris/modes/single"
@@ -353,41 +350,14 @@ func (m *SingleModel) fallStopwatchTick() tea.Cmd {
 }
 
 func (m *SingleModel) podOverviewView() string {
-	width := m.styles.Information.GetWidth() * 2 // Make the podOverviewView wider
-
-	toFixedWidth := func(title, value string) string {
-		return fmt.Sprintf("%s%*s\n", title, width-(1+len(title)), value)
-	}
 
 	var output string
-	output += toFixedWidth("All Pods:", strconv.Itoa(m.game.GetLinesCleared()))
-	output += toFixedWidth("Killed Pods:", strconv.Itoa(m.game.GetLinesCleared()))
-	output += m.game.GetMessage(m.game.GetLinesCleared())
+	output += m.game.LastClearedLines()
 
 	// Beispiel für eine Zeichenfolgen-Slice
 	stringSlice := []string{"Message 1", "Message 2", "Message 3"}
 	for _, str := range stringSlice {
 		output += fmt.Sprintf("%s\n", str)
-	}
-
-	config, err := clientcmd.BuildConfigFromFlags("", "/home/sthings/.kube/homerun-int2")
-	if err != nil {
-		fmt.Printf("Error loading kubeconfig: %v\n", err)
-	}
-
-	// Create the Kubernetes clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		fmt.Printf("Error creating clientset: %v\n", err)
-	}
-
-	pods, err := k8s.GetPodsInNamespace(clientset, "default")
-	if err != nil {
-		fmt.Printf("Error getting pods: %v\n", err)
-	}
-
-	for _, pod := range pods {
-		output += fmt.Sprintf("%s\n", pod.Name)
 	}
 
 	return m.styles.Information.Render(lipgloss.JoinVertical(lipgloss.Left, output))
@@ -492,7 +462,7 @@ func (m *SingleModel) informationView() string {
 	output += toFixedWidth("Lines:", strconv.Itoa(m.game.GetLinesCleared()))
 	output += toFixedWidth("Level:", strconv.Itoa(m.game.GetLevel()))
 	// output += toFixedWidth("Killed Pods:", strconv.Itoa(m.game.GetLinesCleared()))
-	// output += m.game.GetMessage(m.game.GetLinesCleared())
+	// output += m.game.LastClearedLines(m.game.GetLinesCleared())
 	return m.styles.Information.Render(lipgloss.JoinVertical(lipgloss.Left, header, output))
 }
 
@@ -501,10 +471,8 @@ func (m *SingleModel) holdView() string {
 	label := m.styles.Hold.Label.Render("STHINGS-TETRIS")
 	item := m.styles.Hold.Item.Render(m.renderTetrimino(m.game.GetHoldTetrimino(), 1))
 	output := lipgloss.JoinVertical(lipgloss.Top, label, item)
-	output += "Killed Pods: "
-	output += strconv.Itoa(m.game.GetLinesCleared())
-
-	output += m.game.GetMessage(m.game.GetLinesCleared())
+	output += "Last Lines: "
+	output += m.game.LastClearedLines()
 	return m.styles.Hold.View.Render(output)
 }
 

@@ -2,7 +2,6 @@ package single
 
 import (
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"github.com/stuttgart-things/sthings-tetris/pkg/tetris"
@@ -51,28 +50,8 @@ func (g *Game) GetLinesCleared() int {
 	return g.scoring.Lines()
 }
 
-func (g *Game) GetMessage(score int) string {
-
-	var returnValue string
-
-	if score == 0 {
-		atomic.StoreInt64(&cacheNumber, int64(score))
-		returnValue = "0"
-	}
-
-	if score != 0 {
-		oldValue := atomic.LoadInt64(&cacheNumber)
-
-		lines := int(oldValue) - score
-		atomic.StoreInt64(&cacheNumber, int64(score))
-
-		returnValue = strconv.Itoa(lines)
-		atomic.StoreInt64(&cacheNumber, int64(score))
-
-	}
-
-	return returnValue
-
+func (g *Game) LastClearedLines() string {
+	return strconv.Itoa(g.scoring.LastClearedLines())
 }
 
 func (g *Game) GetDefaultFallInterval() time.Duration {
