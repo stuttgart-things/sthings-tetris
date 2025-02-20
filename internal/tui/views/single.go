@@ -6,22 +6,24 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Broderick-Westrope/tetrigo/internal/tui/components"
+	"github.com/stuttgart-things/sthings-tetris/internal/tui/components"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/stopwatch"
-	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/Broderick-Westrope/charmutils"
 
-	"github.com/Broderick-Westrope/tetrigo/internal/config"
-	"github.com/Broderick-Westrope/tetrigo/internal/data"
-	"github.com/Broderick-Westrope/tetrigo/internal/tui"
-	"github.com/Broderick-Westrope/tetrigo/pkg/tetris"
-	"github.com/Broderick-Westrope/tetrigo/pkg/tetris/modes/single"
+	"github.com/stuttgart-things/sthings-tetris/internal/config"
+	"github.com/stuttgart-things/sthings-tetris/internal/data"
+	"github.com/stuttgart-things/sthings-tetris/internal/k8s"
+	"github.com/stuttgart-things/sthings-tetris/internal/tui"
+	"github.com/stuttgart-things/sthings-tetris/pkg/tetris"
+	"github.com/stuttgart-things/sthings-tetris/pkg/tetris/modes/single"
 )
 
 const (
@@ -34,7 +36,7 @@ const (
 Press PAUSE to continue or HOLD to exit.
 `
 	gameOverMessage = `
-   ______                        ____                 
+   ______                        ____
   / ____/___ _____ ___  ___     / __ \_   _____  _____
  / / __/ __ ^/ __ ^__ \/ _ \   / / / / | / / _ \/ ___/
 / /_/ / /_/ / / / / / /  __/  / /_/ /| |/ /  __/ /
@@ -53,6 +55,7 @@ type SingleModel struct {
 	nextQueueLength int
 	fallStopwatch   components.Stopwatch
 	mode            tui.Mode
+	randomMessage   string
 
 	gameTimer     components.Timer
 	gameStopwatch components.Stopwatch
@@ -267,26 +270,19 @@ func (m *SingleModel) pausedUpdate(msg tea.Msg) (*SingleModel, tea.Cmd) {
 }
 
 func (m *SingleModel) playingUpdate(msg tea.Msg) (*SingleModel, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		return m.playingKeyMsgUpdate(msg)
 
+	switch msg := msg.(type) {
 	case stopwatch.TickMsg:
 		if msg.ID != m.fallStopwatch.ID() {
 			break
 		}
 		return m, m.fallStopwatchTick()
-
-	case timer.TimeoutMsg:
-		if msg.ID != m.gameTimer.ID() {
-			break
-		}
-		return m, m.triggerGameOver()
+	case tea.KeyMsg:
+		return m.playingKeyMsgUpdate(msg) // Process key inputs here
 	}
 
 	return m, nil
 }
-
 func (m *SingleModel) playingKeyMsgUpdate(msg tea.KeyMsg) (*SingleModel, tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.keys.Left):
@@ -356,6 +352,47 @@ func (m *SingleModel) fallStopwatchTick() tea.Cmd {
 	return nil
 }
 
+func (m *SingleModel) podOverviewView() string {
+	width := m.styles.Information.GetWidth() * 2 // Make the podOverviewView wider
+
+	toFixedWidth := func(title, value string) string {
+		return fmt.Sprintf("%s%*s\n", title, width-(1+len(title)), value)
+	}
+
+	var output string
+	output += toFixedWidth("All Pods:", strconv.Itoa(m.game.GetLinesCleared()))
+	output += toFixedWidth("Killed Pods:", strconv.Itoa(m.game.GetLinesCleared()))
+	output += m.game.GetMessage(m.game.GetLinesCleared())
+
+	// Beispiel für eine Zeichenfolgen-Slice
+	stringSlice := []string{"Message 1", "Message 2", "Message 3"}
+	for _, str := range stringSlice {
+		output += fmt.Sprintf("%s\n", str)
+	}
+
+	config, err := clientcmd.BuildConfigFromFlags("", "/home/sthings/.kube/homerun-int2")
+	if err != nil {
+		fmt.Printf("Error loading kubeconfig: %v\n", err)
+	}
+
+	// Create the Kubernetes clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Printf("Error creating clientset: %v\n", err)
+	}
+
+	pods, err := k8s.GetPodsInNamespace(clientset, "default")
+	if err != nil {
+		fmt.Printf("Error getting pods: %v\n", err)
+	}
+
+	for _, pod := range pods {
+		output += fmt.Sprintf("%s\n", pod.Name)
+	}
+
+	return m.styles.Information.Render(lipgloss.JoinVertical(lipgloss.Left, output))
+}
+
 func (m *SingleModel) View() string {
 	matrixView, err := m.matrixView()
 	if err != nil {
@@ -363,7 +400,7 @@ func (m *SingleModel) View() string {
 	}
 
 	var output = lipgloss.JoinHorizontal(lipgloss.Top,
-		lipgloss.JoinVertical(lipgloss.Right, m.holdView(), m.informationView()),
+		lipgloss.JoinVertical(lipgloss.Right, m.holdView(), m.informationView(), m.podOverviewView()),
 		matrixView,
 		m.bagView(),
 	)
@@ -415,7 +452,7 @@ func (m *SingleModel) informationView() string {
 
 	var header string
 	headerStyle := lipgloss.NewStyle().Width(width).AlignHorizontal(lipgloss.Center).Bold(true).Underline(true)
-
+	fmt.Sprintln("\n")
 	switch {
 	case m.game.IsGameOver():
 		header = headerStyle.Render("GAME OVER")
@@ -447,20 +484,27 @@ func (m *SingleModel) informationView() string {
 	}
 
 	var output string
-	output += fmt.Sprintln("Score:")
-	output += fmt.Sprintf("%*d\n", width-1, m.game.GetTotalScore())
-	output += fmt.Sprintln("Time:")
-	output += fmt.Sprintf("%*s\n", width-1, timeStr)
+	output += toFixedWidth("\nScore:", strconv.Itoa(m.game.GetTotalScore()))
+	// output += fmt.Sprintf("%*d\n", width-1, m.game.GetTotalScore())
+	output += fmt.Sprintln("Time:", timeStr)
+
+	// output += fmt.Sprintf("%*s\n", width-1, timeStr)
 	output += toFixedWidth("Lines:", strconv.Itoa(m.game.GetLinesCleared()))
 	output += toFixedWidth("Level:", strconv.Itoa(m.game.GetLevel()))
-
+	// output += toFixedWidth("Killed Pods:", strconv.Itoa(m.game.GetLinesCleared()))
+	// output += m.game.GetMessage(m.game.GetLinesCleared())
 	return m.styles.Information.Render(lipgloss.JoinVertical(lipgloss.Left, header, output))
 }
 
 func (m *SingleModel) holdView() string {
-	label := m.styles.Hold.Label.Render("Hold:")
+
+	label := m.styles.Hold.Label.Render("STHINGS-TETRIS")
 	item := m.styles.Hold.Item.Render(m.renderTetrimino(m.game.GetHoldTetrimino(), 1))
 	output := lipgloss.JoinVertical(lipgloss.Top, label, item)
+	output += "Killed Pods: "
+	output += strconv.Itoa(m.game.GetLinesCleared())
+
+	output += m.game.GetMessage(m.game.GetLinesCleared())
 	return m.styles.Hold.View.Render(output)
 }
 
