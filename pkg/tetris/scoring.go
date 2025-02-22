@@ -3,6 +3,9 @@ package tetris
 import (
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/stuttgart-things/homerun-library"
 )
 
 // Scoring is a scoring system for Tetris.
@@ -95,6 +98,39 @@ func (s *Scoring) AddHardDrop(lines int) {
 // Define the file path where we store cleared lines
 const clearedLinesFile = "cleared_lines.log"
 
+var (
+	destination = "https://homerun.homerun-dev.sthings-vsphere.labul.sva.de/generic"
+	token       = "IhrGeheimerToken"
+	insecure    = true
+	dt          = time.Now()
+)
+
+func sendNotification(linesCleared int) {
+	dt := time.Now()
+	messageBody := homerun.Message{
+		Title:           "Lines Cleared",
+		Message:         fmt.Sprintf("Lines Cleared: %d", linesCleared),
+		Severity:        "INFO",
+		Author:          "elvis",
+		Timestamp:       dt.Format("01-02-2006 15:04:05"),
+		System:          "Tetris Game",
+		Tags:            "tetris,gameplay",
+		AssigneeAddress: "",
+		AssigneeName:    "",
+		Artifacts:       "",
+		Url:             "",
+	}
+
+	rendered := homerun.RenderBody(homerun.HomeRunBodyData, messageBody)
+
+	// comment next line and uncomment Print answer lines to debug
+	homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
+	// Print the answer for debugging purposes
+	//answer, resp := homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
+	//fmt.Println("ANSWER STATUS: ", resp.Status)
+	//fmt.Println("ANSWER BODY: ", string(answer))
+}
+
 func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	if a == Actions.None {
 		return false, nil
@@ -124,10 +160,10 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 
 	// ✅ Write to file if cleared lines change and it's not 0
 	if linesCleared > 0 && linesCleared != s.lastCleared {
-		err := appendToFile(clearedLinesFile, fmt.Sprintf("Lines Cleared: %d\n", linesCleared))
-		if err != nil {
-			fmt.Println("⚠️ Error writing to file:", err)
-		}
+		sendNotification(linesCleared)
+		//err := appendToFile(clearedLinesFile, fmt.Sprintf("Lines Cleared: %d\n", linesCleared))
+		//if err != nil {
+		//	fmt.Println("⚠️ Error writing to file:", err)
 	}
 
 	// Update last cleared lines
