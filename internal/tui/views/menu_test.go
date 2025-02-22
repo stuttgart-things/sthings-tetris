@@ -90,7 +90,7 @@ func TestMenu_SwitchModeMsg(t *testing.T) {
 
 			// Wait for initial render
 			var out string
-			teatest.WaitForOutput(t, tm.Output(), func(bytes []byte) bool {
+			teatest.WaitFor(t, tm.Output(), func(bytes []byte) bool {
 				out = string(bytes)
 				return strings.Contains(out, "Username:")
 			}, teatest.WithDuration(time.Second))

@@ -38,7 +38,8 @@ func NewScoring(
 	level, maxLevel int,
 	increaseLevel, endOnMaxLevel bool,
 	maxLines int,
-	endOnMaxLines bool) (*Scoring, error) {
+	endOnMaxLines bool,
+	playerName string) (*Scoring, error) {
 	s := &Scoring{
 		level:         level,
 		maxLevel:      maxLevel,
@@ -47,6 +48,8 @@ func NewScoring(
 
 		maxLines:      maxLines,
 		endOnMaxLines: endOnMaxLines,
+
+		playerName: playerName,
 	}
 	return s, s.validate()
 }
@@ -105,15 +108,15 @@ var (
 	dt          = time.Now()
 )
 
-func sendNotification(linesCleared int) {
+func sendNotification(linesCleared int, playerName string) {
 	dt := time.Now()
 	messageBody := homerun.Message{
 		Title:           "Lines Cleared",
 		Message:         fmt.Sprintf("Lines Cleared: %d", linesCleared),
-		Severity:        "INFO",
-		Author:          "elvis",
+		Severity:        "CHAOS1",
+		Author:          playerName,
 		Timestamp:       dt.Format("01-02-2006 15:04:05"),
-		System:          "Tetris Game",
+		System:          "tetris",
 		Tags:            "tetris,gameplay",
 		AssigneeAddress: "",
 		AssigneeName:    "",
@@ -125,6 +128,7 @@ func sendNotification(linesCleared int) {
 
 	// comment next line and uncomment Print answer lines to debug
 	homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
+
 	// Print the answer for debugging purposes
 	//answer, resp := homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
 	//fmt.Println("ANSWER STATUS: ", resp.Status)
@@ -160,7 +164,7 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 
 	// ✅ Write to file if cleared lines change and it's not 0
 	if linesCleared > 0 && linesCleared != s.lastCleared {
-		sendNotification(linesCleared)
+		sendNotification(linesCleared, s.playerName)
 		//err := appendToFile(clearedLinesFile, fmt.Sprintf("Lines Cleared: %d\n", linesCleared))
 		//if err != nil {
 		//	fmt.Println("⚠️ Error writing to file:", err)

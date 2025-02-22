@@ -22,6 +22,7 @@ type Game struct {
 	softDropStartRow int               // Records where the user began soft drop
 	scoring          *tetris.Scoring   // The scoring system
 	fall             *tetris.Fall      // The system for calculating the fall speed
+	playerName       string
 }
 
 type Input struct {
@@ -37,7 +38,7 @@ type Input struct {
 	Rand         *rand.Rand // The random source to use for Tetrimino generation.
 }
 
-func NewGame(in *Input) (*Game, error) {
+func NewGame(in *Input, playerName string) (*Game, error) {
 	matrix, err := tetris.NewMatrix(40, 10)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func NewGame(in *Input) (*Game, error) {
 	nq := tetris.NewNextQueue(matrix.GetSkyline(), tetris.WithRandSource(in.Rand))
 
 	scoring, err := tetris.NewScoring(
-		in.Level, in.MaxLevel, in.IncreaseLevel, in.EndOnMaxLevel, in.MaxLines, in.EndOnMaxLines,
+		in.Level, in.MaxLevel, in.IncreaseLevel, in.EndOnMaxLevel, in.MaxLines, in.EndOnMaxLines, playerName,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create scoring system: %w", err)
@@ -60,6 +61,7 @@ func NewGame(in *Input) (*Game, error) {
 		softDropStartRow: matrix.GetHeight(),
 		scoring:          scoring,
 		fall:             tetris.NewFall(in.Level),
+		playerName:       playerName,
 	}
 
 	if in.GhostEnabled {

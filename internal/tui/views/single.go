@@ -132,7 +132,7 @@ func NewSingleModel(
 
 	// Create game
 	var err error
-	m.game, err = single.NewGame(gameIn)
+	m.game, err = single.NewGame(gameIn, m.username)
 	if err != nil {
 		return nil, fmt.Errorf("creating single player game: %w", err)
 	}

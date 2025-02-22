@@ -13,6 +13,7 @@ import (
 )
 
 func WaitForMsgOfType[T tea.Msg](t *testing.T, tm *teatest.TestModel, msgCh chan T, timeout time.Duration) {
+	// This is some weird function that seems to doesn't exist, but without it other test files will be broken.
 	msg := tm.WaitForMsg(t, func(msg tea.Msg) bool {
 		_, ok := msg.(T)
 		return ok

@@ -50,7 +50,7 @@ func TestNewScoring(t *testing.T) {
 
 	for name, tc := range tt {
 		t.Run(name, func(t *testing.T) {
-			s, err := NewScoring(tc.level, tc.maxLevel, tc.increaseLevel, tc.endOnMaxLevel, tc.maxLines, tc.endOnMaxLines)
+			s, err := NewScoring(tc.level, tc.maxLevel, tc.increaseLevel, tc.endOnMaxLevel, tc.maxLines, tc.endOnMaxLines, "testPlayer")
 
 			if tc.wantErr != nil {
 				require.EqualError(t, err, tc.wantErr.Error())

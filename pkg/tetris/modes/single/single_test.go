@@ -56,7 +56,7 @@ func TestToggleSoftDrop(t *testing.T) {
 				EndOnMaxLines: false,
 				GhostEnabled:  false,
 				Rand:          rand.New(rand.NewPCG(0, 0)),
-			})
+			}, "Testplayer")
 			require.NoError(t, err)
 
 			game.fall.IsSoftDrop = tt.initialSoftDrop
