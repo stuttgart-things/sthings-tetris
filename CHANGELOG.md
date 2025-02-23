@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/stuttgart-things/sthings-tetris/compare/v1.0.0...v1.0.1) (2025-02-23)
+
+
+### Bug Fixes
+
+* fix/gorelease-config ([c35a55c](https://github.com/stuttgart-things/sthings-tetris/commit/c35a55c30725cd628bedd9e2986b19cc19cae75a))
+
 # 1.0.0 (2025-02-23)
 
 
