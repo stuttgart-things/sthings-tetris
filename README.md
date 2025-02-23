@@ -1,4 +1,4 @@
-# Tetrigo
+# stuttgart-things/sthings-tetris
 
 *teh·tree·go*
 
@@ -8,7 +8,7 @@ A Golang implementation of Tetris, following the official [2009 Tetris Design Gu
 
 This project consists of three main components, depending on what your goals are:
 - ***"I just want to play Tetris"***
-  - The TUI (Text User Interface) in `cmd/tetrigo/` is for you. See the [installation](#installation) section.
+  - The TUI (Text User Interface) in `cmd/sthings-tetris/` is for you. See the [installation](#installation) section.
 - ***"I want to create my own Tetris game/UI"***
   - The packages in `pkg/tetris/modes/` are for you. You can reuse these game modes with your own UI.
 - ***"I want to create my own Tetris game mode"***
@@ -26,7 +26,7 @@ You can find more information on these sections in the [development](#developmen
 
 ## Installation
 
-Tetrigo can be installed by downloading the binary or by building from source. See the instructions below for your preferred method.
+sthings-tetris can be installed by downloading the binary or by building from source. See the instructions below for your preferred method.
 
 ### Binary
 
@@ -36,10 +36,10 @@ Once downloaded you can run the binary from the command line:
 
 ```bash
 # Linux or macOS
-./tetrigo
+./sthings-tetris
 
 # Windows
-tetrigo.exe
+sthings-tetris.exe
 ```
 
 Optionally, you can move the binary to a directory in your `$PATH` to run it from anywhere ([example](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7)).
@@ -51,7 +51,7 @@ Ensure that you have a supported version of Go properly installed and setup. You
 You can then install the latest release globally by running:
 
 ```bash
-go install github.com/stuttgart-things/sthings-tetris/cmd/tetrigo@v0.1.6
+go install github.com/stuttgart-things/sthings-tetris/cmd/sthings-tetris@v0.1.6
 ```
 
 ## Usage
@@ -81,49 +81,49 @@ The menu, leaderboard, etc can be navigated using the arrow keys (moving), escap
 
 ### CLI
 
-Starting Tetrigo with no subcommand or flags will start the game in the menu where you can manually configure simple settings like the player name and game mode:
+Starting sthings-tetris with no subcommand or flags will start the game in the menu where you can manually configure simple settings like the player name and game mode:
 
 ```bash
-./tetrigo
+./sthings-tetris
 ```
 
 You're also able to start the game directly in a game mode (eg. Marathon), skipping the menu:
 
 ```bash
 # Start the game in Marathon mode with a level of 5 and the player name "Brodie"
-./tetrigo play marathon --level=5 --name=Brodie
+./sthings-tetris play marathon --level=5 --name=Brodie
 ```
 
 To see more options for starting the game you can run:
 
 ```bash
-./tetrigo --help
+./sthings-tetris --help
 ```
 
 ### TOML
 
 More complex configuration can be done using a TOML file. If no config file is found sensible defaults will be used.
 
-By default, Tetrigo will look for the file `./tetrigo/config.toml` within the devices XDG config (or equivalent) directory. The [adrg/xdg](https://github.com/adrg/xdg) defines values `XDG_CONFIG_HOME` for various operating systems (eg. on macOS it is `~/Library/Application Support` directory exists it will be stored there, otherwise in `~/Library/Preferences`). You can specify a different file using the `--config` flag.
+By default, sthings-tetris will look for the file `./sthings-tetris/config.toml` within the devices XDG config (or equivalent) directory. The [adrg/xdg](https://github.com/adrg/xdg) defines values `XDG_CONFIG_HOME` for various operating systems (eg. on macOS it is `~/Library/Application Support` directory exists it will be stored there, otherwise in `~/Library/Preferences`). You can specify a different file using the `--config` flag.
 
 ```bash
-./tetrigo --config=/path/to/config.toml
+./sthings-tetris --config=/path/to/config.toml
 ```
 
 An example configuration file is provided in [`example.config.toml`](./example.config.toml).
 
 ## Data
 
-The game data is stored in a SQLite database. By default, the database is stored in `./tetrigo/tetrigo.db` within the devices XDG data (or equivalent) directory. The [adrg/xdg](https://github.com/adrg/xdg) defines `XDG_DATA_HOME` for various operating systems (eg. on macOS if the `~/Library/Application Support` directory exists it will be stored there, otherwise in `/Library/Application Support`). You can specify a different file path using the `--db` flag.
+The game data is stored in a SQLite database. By default, the database is stored in `./sthings-tetris/sthings-tetris.db` within the devices XDG data (or equivalent) directory. The [adrg/xdg](https://github.com/adrg/xdg) defines `XDG_DATA_HOME` for various operating systems (eg. on macOS if the `~/Library/Application Support` directory exists it will be stored there, otherwise in `/Library/Application Support`). You can specify a different file path using the `--db` flag.
 
 ```bash
-./tetrigo --db=/path/to/data.db
+./sthings-tetris --db=/path/to/data.db
 ```
 
 ## Development
 
 This project consists of three main components:
-1. `cmd/tetrigo/`: A TUI (Text User Interface) allowing you to play it out of the box. It also serves as a demonstration on how to use the packages and how to create a TUI using [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+1. `cmd/sthings-tetris/`: A TUI (Text User Interface) allowing you to play it out of the box. It also serves as a demonstration on how to use the packages and how to create a TUI using [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 2. `pkg/tetris/modes/`: The functionality for different Tetris game modes. This can be used to easily create a Tetris game with your own UI but without needing to know the ruleset.
 3. `pkg/tetris/`: The core Tetris logic, including things like Tetrminimos, the Matrix, and scoring. This can be used to create game modes with your own ruleset and requirements.
 
@@ -161,7 +161,7 @@ task cover
 The ordered priorities for testing are:
 1. `pkg/tetris/`
 2. `pkg/tetris/modes/`
-3. `cmd/tetrigo/`
+3. `cmd/sthings-tetris/`
 
 ### TODO
 

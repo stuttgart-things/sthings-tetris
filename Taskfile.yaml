@@ -13,7 +13,6 @@ vars:
       [ "$(git branch --show-current)" != "main" ] && echo "dev-$(git describe --tags --abbrev=0)" || echo $(git describe --tags --abbrev=0)
 dotenv: ['.env', '{{.HOME}}/.env']
 
-
 env:
   GOLANG_CROSS_VERSION: "v1.23"
   PACKAGE_NAME: "github.com/stuttgart-things/sthings-tetris"
@@ -112,7 +111,7 @@ tasks:
   run:
     desc: Run the Go project
     cmds:
-      - go run ./cmd/tetrigo/ {{.CLI_ARGS}}
+      - go run ./cmd/sthingsTetris/ {{.CLI_ARGS}}
 
   cover:
     desc: Run tests with coverage

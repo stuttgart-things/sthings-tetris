@@ -349,20 +349,6 @@ func (m *SingleModel) fallStopwatchTick() tea.Cmd {
 	return nil
 }
 
-func (m *SingleModel) podOverviewView() string {
-
-	var output string
-	output += m.game.LastClearedLines()
-
-	// Beispiel für eine Zeichenfolgen-Slice
-	stringSlice := []string{"Message 1", "Message 2", "Message 3"}
-	for _, str := range stringSlice {
-		output += fmt.Sprintf("%s\n", str)
-	}
-
-	return m.styles.Information.Render(lipgloss.JoinVertical(lipgloss.Left, output))
-}
-
 func (m *SingleModel) View() string {
 	matrixView, err := m.matrixView()
 	if err != nil {
@@ -370,7 +356,7 @@ func (m *SingleModel) View() string {
 	}
 
 	var output = lipgloss.JoinHorizontal(lipgloss.Top,
-		lipgloss.JoinVertical(lipgloss.Right, m.holdView(), m.informationView(), m.podOverviewView()),
+		lipgloss.JoinVertical(lipgloss.Right, m.holdView(), m.informationView()),
 		matrixView,
 		m.bagView(),
 	)
@@ -387,7 +373,28 @@ func (m *SingleModel) View() string {
 		}
 	}
 
+	// Add the "Start!" heading at the top of the view
+
+	bannerStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FFA500")). // Orange color
+		Bold(true)
+
+	// Apply the style only to `banner`
+	styledBanner := bannerStyle.Render(banner) + "\n"
+
+	heading := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FFD700")). // Gold color for the heading
+		Align(lipgloss.Center).
+		Render("   " + styledBanner)
+
+	// Combine the heading with the rest of the output
+	output = lipgloss.JoinVertical(lipgloss.Left, heading, output)
+
+	// Add the help view at the bottom
 	output = lipgloss.JoinVertical(lipgloss.Left, output, m.help.View(m.keys))
+
+	// Center the entire output within the terminal window
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, output)
 }
 
@@ -468,7 +475,7 @@ func (m *SingleModel) informationView() string {
 
 func (m *SingleModel) holdView() string {
 
-	label := m.styles.Hold.Label.Render("STHINGS-TETRIS")
+	label := m.styles.Hold.Label.Render("LASS LATTRA!")
 	item := m.styles.Hold.Item.Render(m.renderTetrimino(m.game.GetHoldTetrimino(), 1))
 	output := lipgloss.JoinVertical(lipgloss.Top, label, item)
 	output += "Last Lines: "
