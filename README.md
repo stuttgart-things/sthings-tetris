@@ -6,6 +6,23 @@ Play Tetris in your terminal & create some chaos on a k8s cluster. Based on [tet
 
 ## DEPLOYMENT
 
+## DEPLOYMENT
+
+<details><summary>BY GITHUB RELEASE</summary>
+
+```bash
+VERSION=v1.0.1
+BIN_DIR=/usr/bin
+cd /tmp && wget https://github.com/stuttgart-things/sthings-tetris/releases/download/${VERSION}/sthings-tetris_Linux_x86_64.tar.gz
+tar xvfz homerun-chaos-catcher_Linux_x86_64.tar.gz
+sudo mv homerun-chaos-catcher ${BIN_DIR}/homerun-chaos-catcher
+sudo chmod +x ${BIN_DIR}/homerun-chaos-catcher
+rm -rf CHANGELOG.md README.md LICENSE
+cd -
+```
+
+</details>
+
 ## DEV
 
 ## LICENSE
