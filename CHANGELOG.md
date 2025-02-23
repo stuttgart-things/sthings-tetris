@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/stuttgart-things/sthings-tetris/compare/v1.0.3...v1.1.0) (2025-02-23)
+
+
+### Features
+
+* feature/enhance-logging ([0ff741c](https://github.com/stuttgart-things/sthings-tetris/commit/0ff741c7d59d0661976067ce7db7a3ab1f5b4cdf))
+
 ## [1.0.3](https://github.com/stuttgart-things/sthings-tetris/compare/v1.0.2...v1.0.3) (2025-02-23)
 
 
