@@ -1,14 +1,15 @@
 # stuttgart-things/sthings-tetris
 
-Play Tetris in your terminal & create some chaos on a k8s cluster. Based on [tetrigo](https://github.com/Broderick-Westrope/tetrigo)) - @Broderick-Westrope thank you for your great work.
+Play Tetris in your terminal & create some chaos on a k8s cluster. Based on [tetrigo](https://github.com/Broderick-Westrope/tetrigo).
+@Broderick-Westrope thank you for your great work.
 
 ## USAGE
 
 <details><summary>RUN</summary>
 
 ```bash
-export HOMERUN_ADDR="https://homerun.homerun-dev.sthings-vsphere.labul.sva.de/generic"
-export HOMERUN_TOKEN="IhrGeheimerToken"
+export HOMERUN_ADDR="https://homerun.homerun-dev.example.com/generic"
+export HOMERUN_TOKEN=""
 export LOG_LINES="TRUE"
 export LOG_PATH="/tmp/sthings-tetris.log"
 export HOMERUN_SEVERITY_PREFIX="CHAOS"
@@ -18,8 +19,6 @@ sthings-tetris
 
 </details>
 
-
-## DEPLOYMENT
 
 ## DEPLOYMENT
 
@@ -39,6 +38,32 @@ cd -
 </details>
 
 ## DEV
+
+<details><summary>TASKS</summary>
+
+```bash
+task: Available tasks for this project:
+* branch:                   Create branch from main
+* build:                    Build the binary
+* check:                    Run pre-commit hooks
+* codegen:                  Generate code dependencies
+* commit:                   Commit + push code into branch
+* cover:                    Run tests with coverage
+* goreleaser:               Release bins w/ goreleaser
+* install:                  Installs Tetrigo        (aliases: i)
+* lint:                     Runs golangci-lint      (aliases: l)
+* mod:                      Downloads and tidy Go modules
+* pr:                       Create pull request into main
+* release:                  Push new version
+* run:                      Run the Go project
+* test:                     Runs test suite      (aliases: t)
+* goreleaser:dryrun:        Releases the project
+* goreleaser:install:       Installs goreleaser
+* goreleaser:release:       Releases the project
+* lint:fix:                 Runs golangci-lint and fixes any issues
+```
+
+</details>
 
 ## LICENSE
 
