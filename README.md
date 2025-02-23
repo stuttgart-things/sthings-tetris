@@ -26,7 +26,7 @@ sthings-tetris
 <details><summary>BY GITHUB RELEASE</summary>
 
 ```bash
-VERSION=v1.1.0
+VERSION=v1.1.1
 BIN_DIR=/usr/bin
 cd /tmp && wget https://github.com/stuttgart-things/sthings-tetris/releases/download/${VERSION}/sthings-tetris_Linux_x86_64.tar.gz
 tar xvfz sthings-tetris_Linux_x86_64.tar.gz
