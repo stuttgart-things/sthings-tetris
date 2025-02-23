@@ -18,6 +18,11 @@ env:
   PACKAGE_NAME: "github.com/stuttgart-things/sthings-tetris"
 
 tasks:
+  check:
+    desc: "Run pre-commit hooks"
+    cmds:
+      - pre-commit run -a
+
   goreleaser:
     desc: Release bins w/ goreleaser
     cmds:
@@ -30,7 +35,7 @@ tasks:
 
   release:
     desc: Push new version
-    deps: [check, lint, test]
+    deps: [check]
     cmds:
       - task: pr
       - npx semantic-release --dry-run
