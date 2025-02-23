@@ -24,7 +24,7 @@ func NewDB(dataSourceName string) (*sql.DB, error) {
 func EnsureTablesExist(db *sql.DB) error {
 	// Leaderboard table
 	_, err := db.Exec(
-		`CREATE TABLE IF NOT EXISTS leaderboard 
+		`CREATE TABLE IF NOT EXISTS leaderboard
 (id INTEGER PRIMARY KEY, game_mode TEXT, name TEXT, time INTEGER, score INTEGER, lines INTEGER, level INTEGER)`,
 	)
 	if err != nil {
