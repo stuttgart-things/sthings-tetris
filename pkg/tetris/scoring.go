@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stuttgart-things/homerun-library"
+	sthingsBase "github.com/stuttgart-things/sthingsBase"
 )
 
 // Scoring is a scoring system for Tetris.
@@ -99,25 +100,29 @@ func (s *Scoring) AddHardDrop(lines int) {
 // The returned boolean indicates if the game should end.
 // ProcessAction processes an action and updates the score, lines cleared, level, etc.
 // Define the file path where we store cleared lines
-const clearedLinesFile = "cleared_lines.log"
 
 var (
-	destination = "https://homerun.homerun-dev.sthings-vsphere.labul.sva.de/generic"
-	token       = "IhrGeheimerToken"
-	insecure    = true
-	dt          = time.Now()
+	homerunAddr    = os.Getenv("HOMERUN_ADDR")
+	homerunToken   = os.Getenv("HOMERUN_TOKEN")
+	logLines       = os.Getenv("LOG_LINES")
+	logPath        = os.Getenv("LOG_PATH")
+	severityPreFix = os.Getenv("HOMERUN_SEVERITY_PREFIX")
+
+	insecure = true
+	dt       = time.Now()
 )
 
-func sendNotification(linesCleared int, playerName string) {
+func sendNotificationToHomerun(linesCleared int, playerName string) {
+
 	dt := time.Now()
 	messageBody := homerun.Message{
-		Title:           "Lines Cleared",
+		Title:           fmt.Sprintf("STHINGS-TETRIS: %d", linesCleared) + " Lines Cleared",
 		Message:         fmt.Sprintf("Lines Cleared: %d", linesCleared),
-		Severity:        "CHAOS1",
+		Severity:        severityPreFix + fmt.Sprintf("%d", linesCleared),
 		Author:          playerName,
 		Timestamp:       dt.Format("01-02-2006 15:04:05"),
-		System:          "tetris",
-		Tags:            "tetris,gameplay",
+		System:          "sthings-tetris",
+		Tags:            "sthings-tetris,score,chaos",
 		AssigneeAddress: "",
 		AssigneeName:    "",
 		Artifacts:       "",
@@ -127,10 +132,10 @@ func sendNotification(linesCleared int, playerName string) {
 	rendered := homerun.RenderBody(homerun.HomeRunBodyData, messageBody)
 
 	// comment next line and uncomment Print answer lines to debug
-	homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
+	homerun.SendToHomerun(homerunAddr, homerunToken, []byte(rendered), insecure)
 
 	// Print the answer for debugging purposes
-	//answer, resp := homerun.SendToHomerun(destination, token, []byte(rendered), insecure)
+	//answer, resp := homerun.SendToHomerun(homerunAddr, token, []byte(rendered), insecure)
 	//fmt.Println("ANSWER STATUS: ", resp.Status)
 	//fmt.Println("ANSWER BODY: ", string(answer))
 }
@@ -162,48 +167,65 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	// Get cleared lines
 	linesCleared := a.GetLinesCleared()
 
+	// CONVERT LOGLINES FROM STRING TO BOOLEAN
+
 	// ✅ Write to file if cleared lines change and it's not 0
 	if linesCleared > 0 && linesCleared != s.lastCleared {
-		sendNotification(linesCleared, s.playerName)
-		//err := appendToFile(clearedLinesFile, fmt.Sprintf("Lines Cleared: %d\n", linesCleared))
-		//if err != nil {
-		//	fmt.Println("⚠️ Error writing to file:", err)
-	}
+		sendNotificationToHomerun(linesCleared, s.playerName)
 
-	// Update last cleared lines
-	s.lastCleared = linesCleared
-	s.lines += linesCleared
+		logLinesBoolean := sthingsBase.ConvertStringToBoolean(logLines)
 
-	// Check for max lines
-	if s.maxLines > 0 && s.lines >= s.maxLines {
-		s.lines = s.maxLines
-		if s.endOnMaxLines {
-			return true, nil
+		if logLinesBoolean {
+			err := logScoreToFile(logPath, fmt.Sprintf(s.playerName+" - Lines Cleared: %d\n", linesCleared))
+			if err != nil {
+				fmt.Println("⚠️ Error writing to file:", err)
+			}
 		}
-	}
 
-	// Level up logic
-	for s.increaseLevel && s.lines >= s.level*5 {
-		s.level++
-		if s.maxLevel > 0 && s.level >= s.maxLevel {
-			s.level = s.maxLevel
-			if s.endOnMaxLevel {
+		// Update last cleared lines
+		s.lastCleared = linesCleared
+		s.lines += linesCleared
+
+		// Check for max lines
+		if s.maxLines > 0 && s.lines >= s.maxLines {
+			s.lines = s.maxLines
+			if s.endOnMaxLines {
 				return true, nil
 			}
-			break
 		}
+
+		// Level up logic
+		for s.increaseLevel && s.lines >= s.level*5 {
+			s.level++
+			if s.maxLevel > 0 && s.level >= s.maxLevel {
+				s.level = s.maxLevel
+				if s.endOnMaxLevel {
+					return true, nil
+				}
+				break
+			}
+		}
+
 	}
 
 	return false, nil
 }
 
-func appendToFile(filename, content string) error {
+func logScoreToFile(filename, content string) error {
+	// Get the current timestamp
+	timestamp := time.Now().Format("2006-01-02 15:04:05") // Standard timestamp format
+
+	// Combine timestamp with the content
+	contentWithTimestamp := fmt.Sprintf("%s - %s\n", timestamp, content)
+
+	// Open the file with append mode
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(content)
+	// Write the content with timestamp to the file
+	_, err = file.WriteString(contentWithTimestamp)
 	return err
 }
