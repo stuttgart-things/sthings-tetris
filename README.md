@@ -4,6 +4,21 @@ Play Tetris in your terminal & create some chaos on a k8s cluster. Based on [tet
 
 ## USAGE
 
+<details><summary>RUN</summary>
+
+```bash
+export HOMERUN_ADDR="https://homerun.homerun-dev.sthings-vsphere.labul.sva.de/generic"
+export HOMERUN_TOKEN="IhrGeheimerToken"
+export LOG_LINES="TRUE"
+export LOG_PATH="/tmp/sthings-tetris.log"
+export HOMERUN_SEVERITY_PREFIX="CHAOS"
+
+sthings-tetris
+```
+
+</details>
+
+
 ## DEPLOYMENT
 
 ## DEPLOYMENT
@@ -11,7 +26,7 @@ Play Tetris in your terminal & create some chaos on a k8s cluster. Based on [tet
 <details><summary>BY GITHUB RELEASE</summary>
 
 ```bash
-VERSION=v1.0.3
+VERSION=v1.1.0
 BIN_DIR=/usr/bin
 cd /tmp && wget https://github.com/stuttgart-things/sthings-tetris/releases/download/${VERSION}/sthings-tetris_Linux_x86_64.tar.gz
 tar xvfz sthings-tetris_Linux_x86_64.tar.gz
