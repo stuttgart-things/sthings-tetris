@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/stuttgart-things/sthings-tetris/compare/v1.1.0...v1.1.1) (2025-02-23)
+
+
+### Bug Fixes
+
+* fix/release ([2ee7bfc](https://github.com/stuttgart-things/sthings-tetris/commit/2ee7bfcb1ec3edb5daa40e8872fbfee7d669f884))
+
 # [1.1.0](https://github.com/stuttgart-things/sthings-tetris/compare/v1.0.3...v1.1.0) (2025-02-23)
 
 
