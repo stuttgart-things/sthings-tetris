@@ -170,7 +170,7 @@ func (s *Scoring) ProcessAction(a Action) (bool, error) {
 	// CONVERT LOGLINES FROM STRING TO BOOLEAN
 
 	// ✅ Write to file if cleared lines change and it's not 0
-	if linesCleared > 0 && linesCleared != s.lastCleared {
+	if linesCleared > 0 {
 		sendNotificationToHomerun(linesCleared, s.playerName)
 
 		logLinesBoolean := sthingsBase.ConvertStringToBoolean(logLines)
