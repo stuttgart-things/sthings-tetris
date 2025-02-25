@@ -1,7 +1,7 @@
 # stuttgart-things/sthings-tetris
 
-play tetris in your terminal & create some chaos on a k8s cluster by homerun messages. 
-Based on [tetrigo](https://github.com/Broderick-Westrope/tetrigo) - @Broderick-Westrope thank you for your great work.
+play tetris in your terminal & create some chaos on a k8s cluster by homerun messages.
+Based on [tetrigo](https://github.com/Broderick-Westrope/tetrigo) - @Broderick-Westrope thank you for your cool work.
 
 ## USAGE
 
